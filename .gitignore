@@ -1,0 +1,4 @@
+.geth/
+.vscode/
+*.log
+configs.json
