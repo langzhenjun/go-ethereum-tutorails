@@ -1,4 +1,4 @@
-package examples
+package tests
 
 import (
 	"context"
@@ -11,7 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/langzhenjun/xiuhu/utils"
+	"github.com/langzhenjun/go-ethereum-tutorials/examples"
+	"github.com/langzhenjun/go-ethereum-tutorials/utils"
 )
 
 func TestTokenERC20(t *testing.T) {
@@ -40,10 +41,10 @@ func TestTokenERC20(t *testing.T) {
 
 	//
 	ERC20AddressHex := configs.Contracts["ERC20"]
-	var ERC20 *TokenERC20
+	var ERC20 *examples.TokenERC20
 	if ERC20AddressHex == "" {
 		// 发布合约
-		ERC20Address, _, token, err := DeployTokenERC20(auth, client, big.NewInt(100), "TokenERC20", "ERC20")
+		ERC20Address, _, token, err := examples.DeployTokenERC20(auth, client, big.NewInt(100), "TokenERC20", "ERC20")
 		if err != nil {
 			t.Fatalf("Failed to deploy TokenERC20: %v\r\n", err)
 		}
@@ -52,7 +53,7 @@ func TestTokenERC20(t *testing.T) {
 		configs.Save()
 	} else {
 		// 获取合约
-		ERC20, err = NewTokenERC20(common.HexToAddress(ERC20AddressHex), client)
+		ERC20, err = examples.NewTokenERC20(common.HexToAddress(ERC20AddressHex), client)
 		if err != nil {
 			t.Fatalf("Failed to deploy contract: %v\r\n", err)
 		}
@@ -66,7 +67,7 @@ func TestTokenERC20(t *testing.T) {
 	t.Logf("Pending Contract: %v\r\n", name)
 
 	ctx := context.Background()
-	transferC := make(chan *TokenERC20Transfer)
+	transferC := make(chan *examples.TokenERC20Transfer)
 	// froms := []common.Address{common.HexToAddress(mainAccountAddressHex)}
 	_, err = ERC20.WatchTransfer(&bind.WatchOpts{Context: ctx}, transferC, nil, nil)
 	if err != nil {
