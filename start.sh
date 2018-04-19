@@ -1,0 +1,1 @@
+geth --dev --datadir ./.geth --rpcport 8545 --password ./password.txt console 2>>geth.log
