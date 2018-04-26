@@ -15,7 +15,7 @@ import (
 	"github.com/langzhenjun/go-ethereum-tutorials/utils"
 )
 
-func TestTokenERC20(t *testing.T) {
+func TestERC20(t *testing.T) {
 	//
 	client, err := ethclient.Dial("../.geth/geth.ipc")
 	if err != nil {
@@ -41,19 +41,19 @@ func TestTokenERC20(t *testing.T) {
 
 	//
 	ERC20AddressHex := configs.Contracts["ERC20"]
-	var ERC20 *contracts.TokenERC20
+	var ERC20 *contracts.ERC20
 	if ERC20AddressHex == "" {
 		// 发布合约
-		ERC20Address, _, token, err := contracts.DeployTokenERC20(auth, client, big.NewInt(100), "TokenERC20", "ERC20")
+		address, _, depolyed, err := contracts.DeployERC20(auth, client, big.NewInt(100), "ERC20", "ERC20")
 		if err != nil {
-			t.Fatalf("Failed to deploy TokenERC20: %v\r\n", err)
+			t.Fatalf("Failed to deploy ERC20: %v\r\n", err)
 		}
-		ERC20 = token
-		configs.Contracts["ERC20"] = ERC20Address.Hex()
+		ERC20 = depolyed
+		configs.Contracts["ERC20"] = address.Hex()
 		configs.Save()
 	} else {
 		// 获取合约
-		ERC20, err = contracts.NewTokenERC20(common.HexToAddress(ERC20AddressHex), client)
+		ERC20, err = contracts.NewERC20(common.HexToAddress(ERC20AddressHex), client)
 		if err != nil {
 			t.Fatalf("Failed to deploy contract: %v\r\n", err)
 		}
@@ -67,7 +67,7 @@ func TestTokenERC20(t *testing.T) {
 	t.Logf("Pending Contract: %v\r\n", name)
 
 	ctx := context.Background()
-	transferC := make(chan *contracts.TokenERC20Transfer)
+	transferC := make(chan *contracts.ERC20Transfer)
 	// froms := []common.Address{common.HexToAddress(mainAccountAddressHex)}
 	_, err = ERC20.WatchTransfer(&bind.WatchOpts{Context: ctx}, transferC, nil, nil)
 	if err != nil {
@@ -82,17 +82,19 @@ func TestTokenERC20(t *testing.T) {
 	t.Logf("Before transfere: FROM: %d, TO: %d\n", balanceFromBefore, balanceToBefore)
 
 	//
-	tx, err := ERC20.Transfer(auth, common.HexToAddress(toAddressHex), big.NewInt(123456789))
-	if err != nil {
-		t.Fatalf("Failed to request token transfer: %v", err)
-	}
+	go func() {
+		tx, err := ERC20.Transfer(auth, common.HexToAddress(toAddressHex), big.NewInt(123456789))
+		if err != nil {
+			t.Fatalf("Failed to request ERC20 transfer: %v", err)
+		}
 
-	t.Logf("Pending Transfer : 0x%x\n", tx.Hash())
+		t.Logf("Pending Transfer : 0x%x\n", tx.Hash())
 
-	_, err = bind.WaitMined(ctx, client, tx)
-	if err != nil {
-		t.Fatalf("tx mining error:%v\n", err)
-	}
+		_, err = bind.WaitMined(ctx, client, tx)
+		if err != nil {
+			t.Fatalf("tx mining error:%v\n", err)
+		}
+	}()
 
 	transfer := <-transferC
 	t.Logf("FROM: %v, TO: %v, VALUE: %v\r\n", transfer.From.Hex(), transfer.To.Hex(), transfer.Value)

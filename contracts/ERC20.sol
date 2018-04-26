@@ -1,15 +1,17 @@
 pragma solidity ^0.4.21;
 
+import "./Game.sol";
 
-interface TokenRecipient { 
+
+interface ERC20Recipient { 
     function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) external; 
 }
 
 
-contract TokenERC20 {
+contract ERC20 is Game {
     // Public variables of the token
-    string public name;
-    string public symbol;
+    string public name = "ERC20";
+    string public symbol = "ERC20";
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
@@ -29,7 +31,7 @@ contract TokenERC20 {
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
-    function TokenERC20(
+    function ERC20(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
@@ -112,7 +114,7 @@ contract TokenERC20 {
      * @param _extraData some extra information to send to the approved contract
      */
     function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
-        TokenRecipient spender = TokenRecipient(_spender);
+        ERC20Recipient spender = ERC20Recipient(_spender);
         if (approve(_spender, _value)) {
             spender.receiveApproval(msg.sender, _value, this, _extraData);
             return true;
